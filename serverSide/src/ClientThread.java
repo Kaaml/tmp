@@ -14,6 +14,8 @@ public class ClientThread extends Thread {
     private BufferedReader in;
     private Server server;
 
+    private String userName = "unknown";
+
     public ClientThread(Socket socket, Server server) {
         System.out.println( "New thread [" + this.getId() + " ] " );
         this.server = server;
@@ -32,6 +34,7 @@ public class ClientThread extends Thread {
             while ((msg = in.readLine()) != null) {
                 System.out.println(socket.getInetAddress() + " MSG{'" + msg + "'}");
                 server.sendToAll(msg );
+                handleMessage(msg);
             }
         }catch (SocketException e ){
             System.out.println( "socket exception zerwane polaczenia" );
@@ -45,4 +48,17 @@ public class ClientThread extends Thread {
         outWritter.println( msg );
     }
 
+    public void handleMessage( String msg ){
+        String command = msg.split(" ", 2 )[0];
+        switch ( command){
+            case "JOIN":
+                server.handleJoin( this, msg );
+                break;
+            default:
+                System.out.println("Command not found" );
+                //send error or sth
+                break;
+        }
+
+    }
 }
