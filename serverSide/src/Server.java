@@ -15,8 +15,6 @@ public class Server {
     private HashMap<String, Channel> serverChannels = new HashMap<>();
 
 
-
-
     class Channel{
 
         protected String channelTopic = "";
@@ -49,6 +47,10 @@ public class Server {
                 member.send( "MSG " + from + " " + msg );
             }
         }
+        public void removeClient( ClientThread client ){
+            channelMembers.remove( client );
+            send( client.getUserName() + " has left the channel " );
+        }
 
     }
 
@@ -63,7 +65,23 @@ public class Server {
     public void handleNick(ClientThread clientThread, String msg) {
         connections.remove( clientThread );
         registerUser.add( clientThread );
-        serverChannels.get("#default").addMember( clientThread );
+        Channel ch = serverChannels.get("#default");
+        ch.addMember( clientThread );
+        clientThread.addChannel(ch);
+    }
+
+    public void handleNickChange(ClientThread clientThread, String msg) {
+        //TODO
+    }
+
+    public void handlePart(ClientThread clientThread, String msg) {
+        String channel = msg.split( " " )[1];
+        Channel ch = serverChannels.get( channel );
+        if( ch != null ){
+            ch.removeClient( clientThread );
+            clientThread.removeChannel(ch);
+        }
+
     }
 
     public void handleUsers(ClientThread clientThread, String msg) {
@@ -110,8 +128,10 @@ public class Server {
                 if (ch == null) {
                     ch = new Channel(channel);
                     serverChannels.put(channel, ch);
+                    clientThread.addChannel(ch );
                 }
                 ch.addMember(clientThread);
+                clientThread.addChannel(ch);
                 System.out.println( "Addded " + clientThread.getUserName() + " to channel " + channel );
             }
         }
