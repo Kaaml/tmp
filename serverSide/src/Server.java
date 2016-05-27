@@ -70,9 +70,6 @@ public class Server {
         clientThread.addChannel(ch);
     }
 
-    public void handleNickChange(ClientThread clientThread, String msg) {
-        //TODO
-    }
 
     public void handlePart(ClientThread clientThread, String msg) {
         String channel = msg.split( " " )[1];
@@ -86,7 +83,15 @@ public class Server {
 
     public void handleUsers(ClientThread clientThread, String msg) {
         String result = "[ ";
-        for( ClientThread user : registerUser ){
+        String chanels[] = msg.split(" " );
+        if( chanels.length <2 )
+            return;
+
+        Channel ch = serverChannels.get( chanels[1] );
+        if( ch == null )
+            return;
+
+        for( ClientThread user : ch.channelMembers ){
             result+=user.getUserName() + " " ;
         }
         result+="]";
@@ -102,7 +107,6 @@ public class Server {
         if( msgTokens[1].startsWith("#" ) ){
             Channel target = serverChannels.get( msgTokens[1] );
             if( target != null ){
-                //target.send(msgTokens[2], msgTokens[1] );
                 String decoratedMessage = "MSG " + msgTokens[1] +" " + clientThread.getUserName() + " " + msgTokens[2] ;
                 target.rawSend( decoratedMessage );
             }else{
@@ -147,17 +151,14 @@ public class Server {
             server = new ServerSocket(1337);
         }catch (Exception e ){
             System.out.println(e.getMessage() );
-            //System.out.println( e.getStackTrace() );
         }
-        //ClientServiceThread.setServer( this );
+
 
         while( true ){
             Socket client = null;
             try {
                 client = server.accept();
                 ClientThread c = new ClientThread(client, this );
-                //registerUser.add(c);
-                //serverChannels.get( "#default" ).addMember( c );
                 connections.add( c );
                 c.start();
             }catch( Exception e ){

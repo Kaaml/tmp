@@ -90,7 +90,10 @@ public class ClientThread extends Thread {
 
     }
     private void handleNick( String msg ){
-        String nick = msg.split(" ", 2)[1];
+        String nicks[] = msg.split(" ", 2);
+        if( nicks.length <2 )
+            return;
+        String nick = nicks[1];
         if( !nickIsSet ) {
             nickIsSet = true;
             this.userName = nick;
