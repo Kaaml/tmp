@@ -7,26 +7,61 @@ import java.net.Socket;
 /**
  * Created by kaaml on 17.05.16.
  */
-public class conn {
+public class conn extends Thread{
 
 
-    private final PrintWriter socketOut;
-    private final Socket ircSocket;
-    private final BufferedReader socketIn;
-
-    public conn() throws IOException {
-        ircSocket = new Socket("localhost", 1337);
-        socketIn = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
-        socketOut = new PrintWriter(ircSocket.getOutputStream(), true);
+    private PrintWriter socketOut = null;
+    private Socket ircSocket;
+    private BufferedReader socketIn = null;
+    private app applitacionForm;
+    public conn( app application )  {
+        this.applitacionForm = application;
+        try {
+            ircSocket = new Socket("localhost", 1337);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            socketIn = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            socketOut = new PrintWriter(ircSocket.getOutputStream(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        socketOut.println( "nick dupak1" );
+        socketOut.println( "join #dupa" );
     }
-    public void run(){
 
-    }
-    public void listen(  ) throws IOException {
+    public void listen()  {
 
         String responseFromServer = null;
-        while ((responseFromServer = socketIn.readLine()) != null) {
-            System.out.println( responseFromServer );
+        try {
+            while ((responseFromServer = socketIn.readLine()) != null) {
+                System.out.println( responseFromServer );
+                applitacionForm.handleMessage( responseFromServer );
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println( "something wrond with socket " );
+        }finally {
+            try {
+                socketIn.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                ircSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            socketOut.close();
         }
+    }
+    @Override
+    public void run(){
+        this.listen();
     }
 }

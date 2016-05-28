@@ -48,6 +48,10 @@ public class ClientThread extends Thread {
             e.printStackTrace();
         }finally {
             System.out.println( "Thread [ " + this.getId() + " ] are closed" );
+            for(Server.Channel ch : memberOf ){
+                ch.removeClient( this );
+            }
+            server.closedUser(this);
         }
     }
     public void send( String msg){

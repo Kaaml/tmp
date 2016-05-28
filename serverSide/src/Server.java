@@ -14,6 +14,10 @@ public class Server {
     private Set< ClientThread> registerUser = new HashSet<>();
     private HashMap<String, Channel> serverChannels = new HashMap<>();
 
+    public void closedUser(ClientThread clientThread) {
+        registerUser.remove( clientThread );
+    }
+
 
     class Channel{
 
