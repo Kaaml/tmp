@@ -31,10 +31,26 @@ public class conn extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        socketOut.println( "nick dupak1" );
-        socketOut.println( "join #dupa" );
+        socketOut.println( "nick Ewangelista" );
+        //socketOut.println( "join #default" );
     }
-
+    public void connect( String host, int port ){
+        try {
+            ircSocket = new Socket( host, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            socketIn = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            socketOut = new PrintWriter(ircSocket.getOutputStream(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public void listen()  {
 
         String responseFromServer = null;
@@ -63,5 +79,8 @@ public class conn extends Thread{
     @Override
     public void run(){
         this.listen();
+    }
+    public void send( String msg ){
+        socketOut.println( msg );
     }
 }

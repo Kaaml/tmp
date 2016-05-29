@@ -16,6 +16,7 @@ public class app extends JFrame {
     private JList list1;
     private JButton button1;
     private JScrollPane scrollPane1;
+    private JLabel label;
     private conn con;
     private HashMap<String, tabedPanel > channelsTab = new HashMap<>();
 
@@ -39,6 +40,8 @@ public class app extends JFrame {
 
         textField1.addKeyListener(new KeyAdapter() {
         });
+        label.setText("<html><font color='green'>Connected</font></html>");
+        tabbedPane1.removeTabAt(0 );
     }
 
     private void createUIComponents() {
@@ -63,8 +66,6 @@ public class app extends JFrame {
         tabedPanel tab = channelsTab.get( tokens[1] );
         if( tab == null ){
             createTab(tokens[1] );
-            //this.tabbedPane1.setSelectedIndex( 2 );
-            //this.tabbedPane1.setTabComponentAt( 2 )
             tab = channelsTab.get( tokens[1] );
         }
         if( tokens[1].startsWith("#" ) ){
@@ -82,6 +83,19 @@ public class app extends JFrame {
         channelsTab.put( title, pane );
         tabbedPane1.addTab( title,  pane );
     }
+    private void removeTab( String title ){
+        if( title.equals("#default" ) ){
+            return;
+        }
+        for( int i = tabbedPane1.getTabCount()-1; i >= 0 ; --i ){
+            System.out.println( i + " : " + tabbedPane1.getTitleAt( i ) );
+            if( tabbedPane1.getTitleAt( i ).equals( title ) ){
+                tabbedPane1.removeTabAt( i );
+                break;
+            }
+        }
+        channelsTab.remove( title );
+    }
 
     private void configureListner(){
         textField1.addKeyListener(new KeyAdapter() {
@@ -90,12 +104,41 @@ public class app extends JFrame {
                 super.keyPressed(e);
                 if( e.getKeyCode() == KeyEvent.VK_ENTER ){
                    System.out.println( tabbedPane1.getTitleAt( tabbedPane1.getSelectedIndex() ));
-                    //con.send( msg ^ textfield.getText() );
+                    String to = tabbedPane1.getTitleAt( tabbedPane1.getSelectedIndex() );
+                    String msg = textField1.getText();
+                    handleTextField( msg, to );
                     textField1.setText("");
                 }
             }
         });
-
+    }
+    private void handleTextField( String msg, String tabName ){
+        if( msg.startsWith("/" ) ){
+            String tokens[] = msg.split(" ", 2 );
+            switch ( tokens[0].toUpperCase() ){
+                case "/EXIT":
+                    System.exit(1 );
+                    break;
+                case "/CLOSE":
+                    if( tabName.startsWith("#" ) )
+                        con.send( "PART " + tabName );
+                    removeTab( tabName );
+                    break;
+                case "/PRIV" :
+                    createTab( tokens[1] );
+                    break;
+                case "/NICK" :
+                    if( tokens.length < 2 )
+                        return;
+                    con.send( "NICK " + tokens[1] );
+                    break;
+                default:
+                    System.out.println( "polecenie nie znane" );
+                    break;
+            }
+        }else{
+            con.send( "MSG " + tabName + " " + msg );
+        }
 
     }
 }
