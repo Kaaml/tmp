@@ -34,5 +34,13 @@ public class tabedPanel extends JPanel {
         String formatedMsg = "< " + dateFormat.format(cal.getTime()) + " > @" + who + ": " + msg + "\n";
         textPane1.setText( textPane1.getText() + formatedMsg );
     }
+    public void fillUsers( String []array ){
+        //TODO
+        DefaultListModel model = (DefaultListModel)list1.getModel();
+        for( String user : array ){
+            model.addElement( "@" + user );
+        }
+        list1.setModel( model );
+    }
 
 }

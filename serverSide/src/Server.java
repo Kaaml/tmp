@@ -33,7 +33,7 @@ public class Server {
         }
 
         public void addMember( ClientThread newMember ){
-            this.send( "Member " + newMember.getUserName() + " has joined to channel " );
+            this.send( newMember.getUserName() + " has joined to channel " );
             channelMembers.add( newMember );
         }
         public void send( String msg ){
@@ -86,7 +86,7 @@ public class Server {
     }
 
     public void handleUsers(ClientThread clientThread, String msg) {
-        String result = "[ ";
+
         String chanels[] = msg.split(" " );
         if( chanels.length <2 )
             return;
@@ -94,11 +94,11 @@ public class Server {
         Channel ch = serverChannels.get( chanels[1] );
         if( ch == null )
             return;
-
+        String result = "USERS " + chanels[1] +" ";
         for( ClientThread user : ch.channelMembers ){
             result+=user.getUserName() + " " ;
         }
-        result+="]";
+        //result+="]";
         clientThread.send( result );
     }
 

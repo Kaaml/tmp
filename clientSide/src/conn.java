@@ -16,22 +16,22 @@ public class conn extends Thread{
     private app applitacionForm;
     public conn( app application )  {
         this.applitacionForm = application;
-        try {
-            ircSocket = new Socket("localhost", 1337);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            socketIn = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            socketOut = new PrintWriter(ircSocket.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        socketOut.println( "nick Ewangelista" );
+//        try {
+//            ircSocket = new Socket("localhost", 1337);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            socketIn = new BufferedReader(new InputStreamReader(ircSocket.getInputStream()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            socketOut = new PrintWriter(ircSocket.getOutputStream(), true);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        socketOut.println( "nick Ewangelista" );
         //socketOut.println( "join #default" );
     }
     public void connect( String host, int port ){

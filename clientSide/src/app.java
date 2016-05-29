@@ -20,6 +20,10 @@ public class app extends JFrame {
     private conn con;
     private HashMap<String, tabedPanel > channelsTab = new HashMap<>();
 
+    private String userName;
+    private String hostName = "localhost";
+    private int portNumber = 1337;
+
     public app() {
         this.setContentPane(this.rootPanel);
         this.setMinimumSize(new Dimension(450, 600));
@@ -27,6 +31,17 @@ public class app extends JFrame {
         this.setVisible(true);
         configureListner();
         con = new conn(this);
+        //runConnectionListening();
+
+       this.createTab("#default" );
+
+        textField1.addKeyListener(new KeyAdapter() {
+        });
+        label.setText("<html><font color='green'>Connected</font></html>");
+        tabbedPane1.removeTabAt(0 );
+    }
+
+    private void runConnectionListening() {
         Runnable r1 = () -> {
             try {
                 con.listen( );
@@ -35,13 +50,6 @@ public class app extends JFrame {
             }
         };
         new Thread( r1 ).start();
-
-       this.createTab("#default" );
-
-        textField1.addKeyListener(new KeyAdapter() {
-        });
-        label.setText("<html><font color='green'>Connected</font></html>");
-        tabbedPane1.removeTabAt(0 );
     }
 
     private void createUIComponents() {
@@ -55,10 +63,24 @@ public class app extends JFrame {
             case "MSG":
                 this.handleMsg(msg );
                 break;
+            case "USERS":
+                this.handleUsers(msg);
+                break;
             default :
                 System.out.println( "Command [ " + msg + " ] nie znanan" );
                 break;
         }
+    }
+
+    private void handleUsers(String msg) {
+        String tokens[] = msg.split(" ", 3 );
+        if( tokens.length < 3 )
+            return;
+        tabedPanel tab = channelsTab.get( tokens[1] );
+        if( tab == null )
+            return;
+        tab.fillUsers( tokens[2].split(" ") );
+
     }
 
     private void handleMsg(String msg) {
@@ -82,6 +104,8 @@ public class app extends JFrame {
         tabedPanel pane = new tabedPanel();
         channelsTab.put( title, pane );
         tabbedPane1.addTab( title,  pane );
+        int count = tabbedPane1.getTabCount();
+        tabbedPane1.setSelectedIndex(count-1);
     }
     private void removeTab( String title ){
         if( title.equals("#default" ) ){
@@ -132,11 +156,28 @@ public class app extends JFrame {
                         return;
                     con.send( "NICK " + tokens[1] );
                     break;
+                case "/JOIN" :
+                    if( tokens.length <2 )
+                        return;
+                    con.send( "JOIN " + tokens[1] );
+                    con.send( "USERS " + tokens[1] );
+                    createTab( tokens[1] );
+                    break;
+                case "/CONNECT":
+                    //TODO: zrobic łączenie
+                    String hostPort[] = tokens[1].split( " " );
+                    int port = Integer.parseInt( hostPort[1] );
+                    con.connect( hostPort[0], port );
+                    runConnectionListening();
+                    break;
                 default:
                     System.out.println( "polecenie nie znane" );
                     break;
             }
         }else{
+            if( !tabName.startsWith("#" ) ){
+                channelsTab.get( tabName ).addMessage( "I", msg );
+            }
             con.send( "MSG " + tabName + " " + msg );
         }
 
