@@ -21,7 +21,8 @@ public class app extends JFrame {
     private JLabel label;
     private conn con;
     private HashMap<String, tabedPanel> channelsTab = new HashMap<>();
-
+    private boolean isConnected = false;
+    private database db = null;
     private String userName;
     private String hostName = "localhost";
     private int portNumber = 1337;
@@ -36,7 +37,8 @@ public class app extends JFrame {
         con = new conn(this);
         //runConnectionListening();
         initAutosugestion();
-
+        db = new database();
+        db.connect();
         this.createTab("#default");
 
         textField1.addKeyListener(new KeyAdapter() {
@@ -99,6 +101,7 @@ public class app extends JFrame {
             //obsluga channela
             String fromAndContetn[] = tokens[2].split(" ", 2);
             tab.addMessage(fromAndContetn[0], fromAndContetn[1]);
+            db.addMessageToHistory( fromAndContetn[0], fromAndContetn[1] );
         } else {
             //wiadomosci od uzytkownika
             tab.addMessage(tokens[1], tokens[2]);
@@ -174,6 +177,8 @@ public class app extends JFrame {
                     createTab(tokens[1]);
                     break;
                 case "/CONNECT":
+                    if( isConnected )
+                        return;
                     String hostPort[] = tokens[1].split(" ");
                     int port = Integer.parseInt(hostPort[1]);
                     con.connect(hostPort[0], port);
@@ -212,5 +217,19 @@ public class app extends JFrame {
             }
         };
 
+    }
+
+    public void connect(UserConfig userCfg) {
+        this.userName = userCfg.getUserName();
+        this.hostName = userCfg.getServerName();
+        this.portNumber = 1337;
+        if( isConnected )
+            return;
+
+        con.connect( this.hostName, this.portNumber );
+        runConnectionListening();
+        label.setText("<html><font color='green'>Connected</font></html>");
+        con.send("NICK " + this.userName );
+        con.send("USERS #default");
     }
 }
